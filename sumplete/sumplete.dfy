@@ -55,20 +55,34 @@ module GameSetup {
   method setupGame(randomSeed: nat, size: nat) returns (grid: dataStructure.Grid)
     requires size > 0
   {
-    var randomNumber := random(randomSeed, size);
-    var newGrid := new int[size, size]((i, j) => (i * j * randomNumber) % 9);
+    var newGrid := createRandomGridOfSize(size);
     grid := new dataStructure.Grid(newGrid);
+  }
+
+  method createRandomGridOfSize(size: nat) returns (grid: array2<int>)
+    ensures grid.Length0 == grid.Length1
+  {
+    grid := new int[size, size]((i, j) => 0);
+
+    var i := 0;
+    var j := 0;
+    while i < grid.Length0 {
+      while j < grid.Length1 {
+        grid[i,j] := random();
+        j := j+1;
+      }
+      i := i+1;
+    }
   }
 
   /**
   Semi random number
    */
-  method random(randomSeed: nat, num: nat) returns (randomNumber: nat)
-    ensures 0 <= randomNumber <= 9
+  method random() returns (randomNumber: nat)
+    ensures 1 <= randomNumber <= 9
   {
-    var randNumbers := new int[] [8, 3, 1, 5, 4, 2, 9, 6, 7, 0];
-    var randNumberPos := ((randomSeed * num + 13) * 7) % randNumbers.Length;
-    assert randNumberPos < randNumbers.Length;
-    randomNumber := randNumbers[randNumberPos];
+    var numbers_pos: set<int> := {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    // var numbers: set<int> := {-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    randomNumber :| randomNumber in numbers_pos;
   }
 }
