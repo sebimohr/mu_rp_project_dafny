@@ -11,7 +11,10 @@ module DataStructure {
     var rows: array<int>
     var columns: array<int>
 
-    constructor(size: nat) {
+    constructor(size: nat)
+      ensures rows.Length == size
+      ensures columns.Length == size
+    {
       rows := new int[size];
       columns := new int[size];
     }
@@ -28,17 +31,20 @@ module DataStructure {
     var sum_target: Sums
     var sum_current: Sums
 
-    constructor(size: nat)
-      requires size > 0
-      ensures grid_start == grid_player
+    constructor(grid: array2<int>)
+      requires grid.Length0 == grid.Length1
       ensures grid_start.Length0 == grid_start.Length1
-      ensures forall i, j :: 0 <= i < grid_start.Length0 && 0 <= j < grid_start.Length1 ==> grid_start[i,j] == 0
+      ensures grid_start.Length0 == grid_player.Length0
+      ensures grid_start.Length1 == grid_player.Length1
+      ensures grid_start.Length0 == sum_target.rows.Length
+      ensures grid_player.Length0 == sum_current.rows.Length
+      // ensures forall i, j :: 0 <= i < grid_start.Length0 && 0 <= j < grid_start.Length1 ==> grid_start[i,j] == 0
     {
-      grid_start := new int[size, size]((i, j) => 0);
-      grid_player := grid_start;
+      grid_start := grid;
+      grid_player := new int[grid.Length0, grid.Length1]((i, j) => 0);
 
-      sum_target := new Sums(size);
-      sum_current := new Sums(size);
+      sum_target := new Sums(grid.Length0);
+      sum_current := new Sums(grid.Length0);
     }
   }
 }
@@ -49,52 +55,9 @@ module GameSetup {
   method setupGame(randomSeed: nat, size: nat) returns (grid: dataStructure.Grid)
     requires size > 0
   {
-    grid := new dataStructure.Grid(size);
-    assert forall i, j :: 0 <= i < grid.grid_start.Length0 && 0 <= j < grid.grid_start.Length1 ==> grid.grid_start[i,j] == 0;
-    setupRandomGrid(randomSeed, grid.grid_start);
-  }
-
-  /**
-  Sets all the fields in the grid to a semi random number, generated with the random seed
-   */
-  method setupRandomGrid(randomSeed: nat, grid: array2<int>)
-    modifies grid
-    requires grid.Length0 == grid.Length1
-    requires forall i, j :: 0 <= i < grid.Length0 && 0 <= j < grid.Length1 ==> grid[i,j] == 0
-    ensures forall i, j :: 0 <= i < grid.Length0 && 0 <= j < grid.Length1 ==> 0 <= grid[i,j] <= 9
-  {
-    var i := 0;
-
-    assert forall n, m :: 0 <= n < grid.Length0 && 0 <= m < grid.Length1 ==> grid[n, m] == 0;
-
-    while i < grid.Length0
-      decreases grid.Length0 - i
-      invariant 0 <= i <= grid.Length0
-      invariant forall n, m :: 0 <= n < i <= grid.Length0 && 0 <= m < grid.Length1 ==> 0 <= grid[n, m] <= 9
-    {
-      var j := 0;
-
-      while j < grid.Length1
-        decreases grid.Length1 - j
-        invariant i < grid.Length0
-        invariant 0 <= j <= grid.Length1
-        invariant j < grid.Length1 ==> 0 <= grid[i,j] <= 9 // TODO: Why can't this be proved on entry -> assert in l. 68
-        invariant forall n, m :: 0 <= n < i <= grid.Length0 && 0 <= m < j <= grid.Length1 ==> 0 <= grid[n, m] <= 9
-      {
-        assert j > 0 ==> 0 <= grid[i,j-1] <= 9;
-
-        var randomNumber := random(randomSeed, i);
-        assert 0 <= randomNumber <= 9;
-
-        grid[i,j] := randomNumber;
-        assert 0 <= grid[i,j] <= 9;
-
-        j := j + 1;
-        assert 0 <= grid[i,j-1] <= 9;
-      }
-
-      i := i + 1;
-    }
+    var randomNumber := random(randomSeed, size);
+    var newGrid := new int[size, size]((i, j) => (i * j * randomNumber) % 9);
+    grid := new dataStructure.Grid(newGrid);
   }
 
   /**
