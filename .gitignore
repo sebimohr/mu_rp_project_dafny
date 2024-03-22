@@ -1,3 +1,5 @@
 .vscode
 examples
 test.dfy
+sumplete/sumplete.dll
+sumplete/sumplete.runtimeconfig.json
