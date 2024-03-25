@@ -21,6 +21,9 @@ module DataStructure {
     var player_rows_sum: array<int>
     var player_columns_sum: array<int>
 
+    /**
+    Ensures that all grids are the same size and the rows and columns have the correct sizes for the grids.
+     */
     ghost predicate Valid()
       reads this
     {
@@ -34,6 +37,9 @@ module DataStructure {
       grid_size == player_rows_sum.Length && grid_size == player_columns_sum.Length
     }
 
+    /**
+    Instantiates the grids and sums.
+     */
     constructor(size: int)
       requires size > 0
       ensures Valid()
@@ -50,6 +56,12 @@ module DataStructure {
       player_columns_sum := new int[size](i => 0);
     }
 
+    /**
+    Sets up the game by:
+    - filling the start_grid with random numbers
+    - filling the target_grid with the chosen numbers
+    - calculating the target_(rows/columns)_sums
+     */
     method setupGame()
       modifies this, start_grid, target_grid, target_rows_sum, target_columns_sum
       requires Valid()
@@ -98,7 +110,14 @@ module DataStructure {
       }
     }
 
-    method toggleField(row: nat, column: nat)
+    /**
+    Toggles the field to a value or 0, depending on its previous value.
+    Also updates the sums and checks if the game is won.
+
+    @param{row} The row where the field is located.
+    @param{column} The column where the field is located.
+     */
+    method toggleField(row: nat, column: nat) returns (gameWon: bool)
       modifies this, player_grid, player_rows_sum, player_columns_sum
       requires Valid()
       requires 0 <= row < grid_size && 0 <= column < grid_size
@@ -114,8 +133,13 @@ module DataStructure {
       }
 
       calculateCurrentPlayerSums();
+
+      gameWon := false;
     }
 
+    /**
+    Calculates the current sum of each player_(rows/columns)_sum.
+     */
     method calculateCurrentPlayerSums()
       modifies this, player_rows_sum, player_columns_sum
       requires Valid()
