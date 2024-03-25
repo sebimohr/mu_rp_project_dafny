@@ -78,6 +78,25 @@ module DataStructure {
         }
         i := i + 1;
       }
+
+      i, j := 0, 0;
+      while i < size
+        invariant size == target_grid.Length0
+        invariant Valid()
+        modifies target_rows_sum, target_columns_sum
+      {
+        while j < size
+          invariant size == target_grid.Length0
+          invariant Valid()
+          modifies target_rows_sum, target_columns_sum
+        {
+          var currentNum := target_grid[i,j];
+          target_rows_sum[i] := target_rows_sum[i] + currentNum;
+          target_columns_sum[j] := target_columns_sum[j] + currentNum;
+          j := j + 1;
+        }
+        i := i + 1;
+      }
     }
 
     /**
