@@ -8,18 +8,19 @@ module DataStructure {
   The sumplete grid.
    */
   class Grid {
+    // grid_size == n
     ghost var grid_size: int
 
     // n*n grid -> rows*columns
-    var start_grid: array2<int>
-    var target_grid: array2<int>
-    var target_rows_sum: array<int>
-    var target_columns_sum: array<int>
+    var start_grid: array2<int> // grid that gets displayed to the player
 
-    // n*n grid -> rows*columns
-    var player_grid: array2<int>
-    var player_rows_sum: array<int>
-    var player_columns_sum: array<int>
+    var target_grid: array2<int> // solution to the puzzle
+    var target_rows_sum: array<int> // rows sums the player has to fulfill
+    var target_columns_sum: array<int> // column sums the player has to fulfill
+
+    var player_grid: array2<int> // grid with the currently chosen numbers, at the beginning all nums are deactivated
+    var player_rows_sum: array<int> // rows sum that the player currently has
+    var player_columns_sum: array<int> // columns sum that the player currently has
 
     /**
     Ensures that all grids are the same size and the rows and columns have the correct sizes for the grids.
@@ -47,6 +48,7 @@ module DataStructure {
       grid_size := size;
 
       start_grid := new int[size, size]((i, j) => 0);
+
       target_grid := new int[size, size]((i, j) => 0);
       target_rows_sum := new int[size](i => 0);
       target_columns_sum := new int[size](i => 0);
@@ -116,6 +118,8 @@ module DataStructure {
 
     @param{row} The row where the field is located.
     @param{column} The column where the field is located.
+
+    @returns{bool} True if the game is won, else false.
      */
     method toggleField(row: nat, column: nat) returns (gameWon: bool)
       modifies this, player_grid, player_rows_sum, player_columns_sum
@@ -133,8 +137,7 @@ module DataStructure {
       }
 
       calculateCurrentPlayerSums();
-
-      gameWon := false;
+      gameWon := determineGameState();
     }
 
     /**
@@ -168,7 +171,32 @@ module DataStructure {
     }
 
     /**
+    Checks if game is won with the current player_grid.
+
+    @returns{bool} True if the game is won, else false.
+     */
+    method determineGameState() returns (isGameWon: bool)
+      requires Valid()
+      ensures Valid()
+    {
+      var i := 0;
+      isGameWon := true;
+
+      while i < player_rows_sum.Length
+        invariant Valid()
+      {
+        if(player_rows_sum[i] != target_rows_sum[i] ||
+           player_columns_sum[i] != target_columns_sum[i]) {
+          isGameWon := false;
+        }
+        i := i + 1;
+      }
+    }
+
+    /**
     Random number generator.
+
+    @returns{int} Random number between 1 and 9.
     */
     method random() returns (randomNumber: nat)
       ensures 1 <= randomNumber <= 9
@@ -179,11 +207,13 @@ module DataStructure {
 
     /**
     Random boolean generator.
+
+    @returns{bool} Random boolean.
     */
     method randomBool() returns (randomBool: bool)
     {
-      var bools: set<bool> := {true, false};
-      randomBool :| randomBool in bools;
+      var boolSet: set<bool> := {true, false};
+      randomBool :| randomBool in boolSet;
     }
   }
 }
