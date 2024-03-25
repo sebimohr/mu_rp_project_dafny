@@ -8,6 +8,8 @@ module DataStructure {
   The sumplete grid.
    */
   class Grid {
+    ghost var grid_size: int
+
     // n*n grid -> rows*columns
     var start_grid: array2<int>
     var target_grid: array2<int>
@@ -19,28 +21,25 @@ module DataStructure {
     var player_rows_sum: array<int>
     var player_columns_sum: array<int>
 
-    predicate Valid()
+    ghost predicate Valid()
       reads this
-      reads start_grid
-      reads target_grid, target_rows_sum, target_columns_sum
-      reads player_grid, player_rows_sum, player_columns_sum
     {
-      // ensure n*n grid
-      start_grid.Length0 == start_grid.Length1 &&
-
-      // ensure start_grid, target_grid and player_grid have the same size
-      start_grid.Length0 == target_grid.Length0 && start_grid.Length1 == target_grid.Length1 &&
-      start_grid.Length0 == player_grid.Length0 && start_grid.Length1 == player_grid.Length1 &&
+      // ensure all grids have the same n*n size
+      grid_size == start_grid.Length0 && grid_size == start_grid.Length1 &&
+      grid_size == target_grid.Length0 && grid_size == target_grid.Length1 &&
+      grid_size == player_grid.Length0 && grid_size == player_grid.Length1 &&
 
       // ensure sum arrays have same length as rows & columns
-      start_grid.Length0 == target_rows_sum.Length && start_grid.Length1 == target_columns_sum.Length &&
-      player_grid.Length0 == target_rows_sum.Length && player_grid.Length1 == target_columns_sum.Length
+      grid_size == target_rows_sum.Length && grid_size == target_columns_sum.Length &&
+      grid_size == player_rows_sum.Length && grid_size == player_columns_sum.Length
     }
 
     constructor(size: int)
       requires size > 0
       ensures Valid()
     {
+      grid_size := size;
+
       start_grid := new int[size, size]((i, j) => 0);
       target_grid := new int[size, size]((i, j) => 0);
       target_rows_sum := new int[size](i => 0);
@@ -60,12 +59,12 @@ module DataStructure {
       var size := start_grid.Length0;
 
       while i < size
-        invariant size == start_grid.Length0
+        invariant size == grid_size
         invariant Valid()
         modifies start_grid, target_grid
       {
         while j < size
-          invariant size == start_grid.Length0
+          invariant size == grid_size
           invariant Valid()
           modifies start_grid, target_grid
         {
@@ -81,18 +80,63 @@ module DataStructure {
 
       i, j := 0, 0;
       while i < size
-        invariant size == target_grid.Length0
+        invariant size == grid_size
         invariant Valid()
         modifies target_rows_sum, target_columns_sum
       {
         while j < size
-          invariant size == target_grid.Length0
+          invariant size == grid_size
           invariant Valid()
           modifies target_rows_sum, target_columns_sum
         {
           var currentNum := target_grid[i,j];
           target_rows_sum[i] := target_rows_sum[i] + currentNum;
           target_columns_sum[j] := target_columns_sum[j] + currentNum;
+          j := j + 1;
+        }
+        i := i + 1;
+      }
+    }
+
+    method toggleField(row: nat, column: nat)
+      modifies this, player_grid, player_rows_sum, player_columns_sum
+      requires Valid()
+      requires 0 <= row < grid_size && 0 <= column < grid_size
+      ensures Valid()
+      // ensures old(player_grid[row, column]) == 0 ==> player_grid[row, column] == start_grid[row, column]
+      // ensures old(player_grid[row, column]) != 0 ==> player_grid[row, column] == 0
+    {
+      if player_grid[row, column] == 0 {
+        player_grid[row, column] := player_grid[row, column];
+      }
+      else {
+        player_grid[row, column] := 0;
+      }
+
+      calculateCurrentPlayerSums();
+    }
+
+    method calculateCurrentPlayerSums()
+      modifies this, player_rows_sum, player_columns_sum
+      requires Valid()
+      ensures Valid()
+    {
+      var i, j := 0, 0;
+      var size := player_grid.Length0;
+
+      while i < size
+        invariant size == grid_size
+        invariant Valid()
+        modifies player_rows_sum, player_columns_sum
+      {
+        while j < size
+          invariant size == grid_size
+          invariant Valid()
+          modifies player_rows_sum, player_columns_sum
+        {
+          var currentNum := player_grid[i,j];
+          player_rows_sum[i] := player_rows_sum[i] + currentNum;
+          player_columns_sum[j] := player_columns_sum[j] + currentNum;
           j := j + 1;
         }
         i := i + 1;
