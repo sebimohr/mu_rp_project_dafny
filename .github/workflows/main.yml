@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - "sumplete/sumplete.dfy"
+      - "sumplete/randomNum.cs"
   pull_request:
     paths:
       - "sumplete/sumplete.dfy"
+      - "sumplete/randomNum.cs"
 
 jobs:
   build:
@@ -17,8 +19,8 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
 
-      - name: Verify Dafny file
-        run: dafny /compile:0 sumplete/sumplete.dfy
+      - name: Compile and test
+        run: (cd sumplete && make)
 
     # - name: Run tests
     # run: | # TODO: Add test

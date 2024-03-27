@@ -1,6 +1,6 @@
 .vscode
 examples
 test.dfy
-sumplete/*.cs
+sumplete/sumplete.cs
 sumplete/*.dll
 sumplete/*.runtimeconfig.json
