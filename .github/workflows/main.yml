@@ -14,8 +14,6 @@ jobs:
           fetch-depth: 0
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
-        with:
-          dafny-version: "4.4.0"
 
       - name: Compile and test
         run: (cd sumplete && make)
