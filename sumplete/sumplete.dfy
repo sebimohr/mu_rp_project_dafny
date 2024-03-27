@@ -3,6 +3,13 @@ Sebastian Mohr - 23141808
 Project: Part 1 - Sumplete
 */
 
+include "./externalMethods.cs"
+
+/**
+Random Int generated in a C# method.
+ */
+function {:extern "ExternalMethods", "RandomInt"} RandomInt(min: int, max: int): int
+
 /**
 The sumplete grid.
  */
@@ -226,16 +233,18 @@ class Grid {
     }
   }
 
-    /**
-    Random number generator.
+  /**
+  Random number generator.
 
-    @returns{int} Random number between 1 and 9.
-    */
-  method random() returns (randomNumber: nat)
+  @returns{int} Random number between 1 and 9.
+  */
+  method random() returns (randomNumber: int)
     ensures 1 <= randomNumber <= 9
   {
-    var numberSet := {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    randomNumber :| randomNumber in numberSet;
+    var min := 1;
+    var max := 9;
+    randomNumber := RandomInt(min, max);
+    expect min <= randomNumber <= max;
   }
 
     /**
@@ -245,10 +254,12 @@ class Grid {
     */
   method randomBool() returns (randomBool: bool)
   {
-    var boolSet: set<bool> := {true, false};
-    randomBool :| randomBool in boolSet;
+    randomBool := RandomInt(0, 1) == 1;
   }
 
+  /**
+  Prints the target_grid and its sums to the console.
+   */
   method printToConsole()
     requires Valid()
     ensures Valid()
