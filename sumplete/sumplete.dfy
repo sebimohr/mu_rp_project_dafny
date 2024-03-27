@@ -98,7 +98,7 @@ class Grid {
       // invariant forall k, j | i < k < grid_size && 0 <= j < grid_size :: target_grid[k,j] == old(target_grid[k,j])
     {
       assert i < size;
-
+      j := 0;
       while j < size
         invariant size == grid_size
         invariant Valid()
@@ -131,6 +131,7 @@ class Grid {
       invariant Valid()
       // invariant 0 <= i < grid_size ==> (forall j | 0 <= j < grid_size :: (target_grid[i,j] == 0 || target_grid[i,j] == start_grid[i,j]))
     {
+      j := 0;
       while j < size
         invariant size == grid_size
         invariant Valid()
@@ -188,6 +189,7 @@ class Grid {
       invariant size == grid_size
       invariant Valid()
     {
+      j := 0;
       while j < size
         invariant size == grid_size
         modifies player_rows_sum, player_columns_sum
@@ -247,20 +249,38 @@ class Grid {
     randomBool :| randomBool in boolSet;
   }
 
-  function printToConsole() : string
-    reads this, start_grid, player_grid, target_rows_sum, target_columns_sum, player_rows_sum, player_columns_sum
+  method printToConsole()
     requires Valid()
     ensures Valid()
   {
-    "sup"
+    var i, j := 0, 0;
+    while i < start_grid.Length0 {
+      j := 0;
+      while j < start_grid.Length1 {
+        print start_grid[i, j];
+        print "\t";
+        j := j + 1;
+      }
+      print target_rows_sum[i];
+      print "\n";
+
+      j := 0;
+      i := i + 1;
+    }
+
+    i := 0;
+    while i < target_columns_sum.Length {
+      print target_columns_sum[i];
+      print "\t";
+      i := i + 1;
+    }
   }
 }
 
 method {:main} Main() {
   var grid := new Grid(3);
   grid.setupGame();
-  var output := grid.printToConsole();
-  print output;
+  grid.printToConsole();
 
   // TODO: wait for userInput
   // TODO: give feedback to user
