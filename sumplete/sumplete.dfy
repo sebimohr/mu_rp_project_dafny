@@ -3,7 +3,7 @@ Sebastian Mohr - 23141808
 Project: Part 1 - Sumplete
 */
 
-include "./externalMethods.cs"
+include "externalMethods.cs"
 
 /**
 Random Int generated in a C# method.
