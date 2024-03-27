@@ -43,6 +43,14 @@ class Grid {
   constructor(size: int)
     requires size > 0
     ensures Valid()
+    // ensuring that all variables are instantiated here so Main() is the owner
+    ensures fresh(start_grid) &&
+            fresh(target_grid) &&
+            fresh(target_rows_sum) &&
+            fresh(target_columns_sum) &&
+            fresh(player_grid) &&
+            fresh(player_rows_sum) &&
+            fresh(player_columns_sum)
   {
     grid_size := size;
 
@@ -67,20 +75,37 @@ class Grid {
     modifies start_grid, target_grid, target_rows_sum, target_columns_sum
     requires Valid()
     ensures Valid()
+    // ensures forall i, j | 0 <= i < grid_size && 0 <= j < grid_size :: (start_grid[i,j] == target_grid[i,j] || target_grid[i,j] == 0)
+  {
+    setupGrid();
+    setupSums();
+  }
+
+  method setupGrid()
+    modifies this.start_grid, this.target_grid
+    requires Valid()
+    ensures Valid()
   {
     var i, j := 0, 0;
     var size := start_grid.Length0;
 
+    assert forall i, j | 0 <= i < grid_size && 0 <= j < grid_size :: target_grid[i,j] == old(target_grid[i,j]);
+
     while i < size
       invariant size == grid_size
       invariant Valid()
-      modifies start_grid, target_grid
+      // invariant forall k, j | 0 <= k < i <= grid_size && 0 <= j < grid_size :: (target_grid[k, j] == start_grid[k, j] || target_grid[k, j] == old(target_grid[k, j]))
+      // invariant forall k, j | i < k < grid_size && 0 <= j < grid_size :: target_grid[k,j] == old(target_grid[k,j])
     {
+      assert i < size;
+
       while j < size
         invariant size == grid_size
         invariant Valid()
-        modifies start_grid, target_grid
+        // invariant (0 <= i < grid_size && 0 <= j < grid_size) ==>
+        //             (target_grid[i,j] == old(target_grid[i,j]) || target_grid[i,j] == start_grid[i,j])
       {
+        // assert target_grid[i,j] == old(target_grid[i,j]);
         start_grid[i,j] := random();
         var randomBool := randomBool();
         if randomBool {
@@ -91,16 +116,25 @@ class Grid {
       i := i + 1;
     }
 
-    i, j := 0, 0;
+    // assert forall i, j | 0 <= i < grid_size && 0 <= j < grid_size :: (start_grid[i,j] == target_grid[i,j] || target_grid[i,j] == 0);
+  }
+
+  method setupSums()
+    modifies this.target_columns_sum, this.target_rows_sum
+    requires Valid()
+    ensures Valid()
+  {
+    var i, j := 0, 0;
+    var size := start_grid.Length0;
     while i < size
       invariant size == grid_size
       invariant Valid()
-      modifies target_rows_sum, target_columns_sum
+      // invariant 0 <= i < grid_size ==> (forall j | 0 <= j < grid_size :: (target_grid[i,j] == 0 || target_grid[i,j] == start_grid[i,j]))
     {
       while j < size
         invariant size == grid_size
         invariant Valid()
-        modifies target_rows_sum, target_columns_sum
+        // invariant 0 <= j < grid_size ==> (target_grid[i,j] == 0 || target_grid[i,j] == start_grid[i,j])
       {
         var currentNum := target_grid[i,j];
         target_rows_sum[i] := target_rows_sum[i] + currentNum;
@@ -125,11 +159,11 @@ class Grid {
     requires Valid()
     requires 0 <= row < grid_size && 0 <= column < grid_size
     ensures Valid()
-    // ensures old(player_grid[row, column]) == 0 ==> player_grid[row, column] == start_grid[row, column]
-    // ensures old(player_grid[row, column]) != 0 ==> player_grid[row, column] == 0
+    ensures old(player_grid[row, column]) != 0 ==> player_grid[row, column] == 0
+    ensures old(player_grid[row, column]) == 0 ==> player_grid[row, column] == start_grid[row, column]
   {
     if player_grid[row, column] == 0 {
-      player_grid[row, column] := player_grid[row, column];
+      player_grid[row, column] := start_grid[row, column];
     }
     else {
       player_grid[row, column] := 0;
@@ -153,11 +187,9 @@ class Grid {
     while i < size
       invariant size == grid_size
       invariant Valid()
-      modifies player_rows_sum, player_columns_sum
     {
       while j < size
         invariant size == grid_size
-        invariant Valid()
         modifies player_rows_sum, player_columns_sum
       {
         var currentNum := player_grid[i,j];
@@ -218,6 +250,7 @@ class Grid {
 
 method Main() {
   var grid := new Grid(3);
+  grid.setupGame();
 
   // TODO: setupGame();
   // TODO: print grid to console
