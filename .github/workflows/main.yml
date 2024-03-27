@@ -18,7 +18,7 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
 
       - name: Verify Dafny file
-        run: dafny /compile:0 /verify sumplete/sumplete.dfy
+        run: dafny /compile:0 sumplete/sumplete.dfy
 
     # - name: Run tests
     # run: | # TODO: Add test
