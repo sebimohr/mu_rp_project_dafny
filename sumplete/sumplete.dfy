@@ -246,14 +246,22 @@ class Grid {
     var boolSet: set<bool> := {true, false};
     randomBool :| randomBool in boolSet;
   }
+
+  function printToConsole() : string
+    reads this, start_grid, player_grid, target_rows_sum, target_columns_sum, player_rows_sum, player_columns_sum
+    requires Valid()
+    ensures Valid()
+  {
+    "sup"
+  }
 }
 
-method Main() {
+method {:main} Main() {
   var grid := new Grid(3);
   grid.setupGame();
+  var output := grid.printToConsole();
+  print output;
 
-  // TODO: setupGame();
-  // TODO: print grid to console
   // TODO: wait for userInput
   // TODO: give feedback to user
   // TODO: let user restart game (setup new game)
