@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
@@ -15,7 +15,7 @@ jobs:
       - name: "Install Dafny"
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "nightly-latest"
+          dafny-version: "4.4.0"
 
       - name: Compile and test
         run: (cd sumplete && make)
