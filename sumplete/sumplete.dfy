@@ -6,11 +6,6 @@ Project: Part 1 - Sumplete
 include "externalMethods.cs"
 
 /**
-Random Int generated in a C# method.
- */
-function {:extern "ExternalMethods", "RandomInt"} RandomInt(min: int, max: int): int
-
-/**
 The sumplete grid.
  */
 class Grid {
@@ -256,6 +251,11 @@ class Grid {
   {
     randomBool := RandomInt(0, 1) == 1;
   }
+
+  /**
+  Random Int generated in a C# method.
+   */
+  function {:extern "ExternalMethods", "RandomInt"} RandomInt(min: int, max: int): int
 
   /**
   Prints the target_grid and its sums to the console.

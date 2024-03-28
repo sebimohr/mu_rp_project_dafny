@@ -1,4 +1,5 @@
 .vscode
+.idea
 examples
 test.dfy
 sumplete/sumplete.cs
