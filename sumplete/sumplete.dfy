@@ -77,6 +77,10 @@ class Grid {
     modifies start_grid, target_grid, target_rows_sum, target_columns_sum
     requires Valid()
     ensures Valid()
+    /**
+    WHAT I WANTED TO DO HERE:
+    I wanted to also ensure in the end, that all the values in the target_grid are either equal to the start_grid or 0.
+     */
     // ensures forall i, j | 0 <= i < grid_size && 0 <= j < grid_size :: (start_grid[i,j] == target_grid[i,j] || target_grid[i,j] == 0)
   {
     setupGrid();
@@ -186,6 +190,10 @@ class Grid {
     modifies player_rows_sum, player_columns_sum
     requires Valid()
     ensures Valid()
+    /**
+    The sums should be a sum of all elements in the rows or columns they represent.
+     */
+    // ensures forall i | 0 <= i < player_columns_sum.Length :: player_columns_sum[i] == GetColumnSum(player_grid, i) && player_rows_sum[i] == GetRowSum(player_grid, i)
   {
     var i, j := 0, 0;
     var size := player_grid.Length0;
@@ -197,6 +205,7 @@ class Grid {
       j := 0;
       while j < size
         invariant size == grid_size
+        // invariant forall m :: 0 <= m < j ==> player_rows_sum[m] == SumToRow(player_grid, i, m) && player_columns_sum[m] == SumToColumn(player_grid, j, m)
         modifies player_rows_sum, player_columns_sum
       {
         var currentNum := player_grid[i,j];
@@ -216,17 +225,26 @@ class Grid {
   method determineGameState() returns (isGameWon: bool)
     requires Valid()
     ensures Valid()
+    ensures (forall i | 0 <= i < player_rows_sum.Length :: player_rows_sum[i] == target_rows_sum[i] && player_columns_sum[i] == target_columns_sum[i]) ==> isGameWon
+    /**
+    WHAT I WANTED TO DO HERE:
+    The method should return false when there is at least one sum in rows or columns array that doesn't match.
+     */
+    // ensures (exists i | 0 <= i < player_rows_sum.Length :: player_rows_sum[i] != target_rows_sum[i] || player_columns_sum[i] != target_columns_sum[i]) ==> !isGameWon
   {
     var i := 0;
     isGameWon := true;
 
     while i < player_rows_sum.Length
       invariant Valid()
+      invariant i <= player_rows_sum.Length
+      invariant (forall j :: 0 <= j < i ==> player_rows_sum[j] == target_rows_sum[j] && player_columns_sum[j] == target_columns_sum[j]) ==> isGameWon
+      // invariant (exists j :: (0 <= j < i ==> (player_rows_sum[j] != target_rows_sum[j] || player_columns_sum[j] != target_columns_sum[j]))) ==> !isGameWon
     {
-      if(player_rows_sum[i] != target_rows_sum[i] ||
-         player_columns_sum[i] != target_columns_sum[i]) {
+      if (player_rows_sum[i] != target_rows_sum[i] || player_columns_sum[i] != target_columns_sum[i]) {
         isGameWon := false;
       }
+
       i := i + 1;
     }
   }
@@ -252,7 +270,12 @@ class Grid {
   */
   method randomBool() returns (randomBool: bool)
   {
-    randomBool := RandomInt(0, 1) == 1;
+    var min := 0;
+    var max := 1;
+    var randomNum := RandomInt(0, 1);
+    expect min <= randomNum <= max;
+
+    randomBool := randomNum == 1;
   }
 
   /**
@@ -261,12 +284,14 @@ class Grid {
   function {:extern "ExternalMethods", "RandomInt"} RandomInt(min: int, max: int): int
 
   /**
-  Prints the target_grid and its sums to the console.
+  Prints the start_grid and its sums to the console.
    */
   method printToConsole()
     requires Valid()
     ensures Valid()
   {
+    print "The start grid: \n";
+
     var i, j := 0, 0;
     while i < start_grid.Length0 {
       j := 0;
@@ -288,6 +313,62 @@ class Grid {
       print "\t";
       i := i + 1;
     }
+  }
+
+  /**
+  Sums up a column of a grid.
+
+  @param{grid} The grid.
+  @param{column} The column to sum up.
+   */
+  function GetColumnSum(grid: array2<int>, column: int): int
+    requires 0 <= column < grid.Length1
+    reads grid
+  {
+    SumToColumn(grid, column, grid.Length0)
+  }
+
+  /**
+  Sums up a row of a grid.
+
+  @param{grid} The grid.
+  @param{row} The row to sum up.
+   */
+  function GetRowSum(grid: array2<int>, row: int): int
+    requires 0 <= row < grid.Length0
+    reads grid
+  {
+    SumToRow(grid, row, grid.Length1)
+  }
+
+  /**
+  Helper: Sums up a column of a grid.
+
+  @param{grid} The grid.
+  @param{column} The column to sum up.
+  @param{n} The count of numbers to be counted, should be the length of the column.
+   */
+  function SumToColumn(grid: array2<int>, column: int, n: int): int
+    requires 0 <= column < grid.Length1
+    requires 0 <= n <= grid.Length0
+    reads grid
+  {
+    if n == 0 then 0 else SumToColumn(grid, column, n-1) + grid[n-1, column]
+  }
+
+  /**
+  Helper: Sums up a row of a grid.
+
+  @param{grid} The grid.
+  @param{column} The column to sum up.
+  @param{n} The count of numbers to be counted, should be the length of the column.
+   */
+  function SumToRow(grid: array2<int>, row: int, n: int): int
+    requires 0 <= row < grid.Length0
+    requires 0 <= n <= grid.Length1
+    reads grid
+  {
+    if n == 0 then 0 else SumToRow(grid, row, n-1) + grid[row, n-1]
   }
 }
 
