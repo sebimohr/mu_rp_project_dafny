@@ -1,4 +1,4 @@
-  /*
+/*
 Sebastian Mohr - 23141808
 Project: Part 1 - Sumplete
 */
@@ -121,6 +121,9 @@ class Grid {
     // assert forall i, j | 0 <= i < grid_size && 0 <= j < grid_size :: (start_grid[i,j] == target_grid[i,j] || target_grid[i,j] == 0);
   }
 
+  /**
+  Sets up the row and column sums of the current target_grid.
+   */
   method setupSums()
     modifies this.target_columns_sum, this.target_rows_sum
     requires Valid()
@@ -148,15 +151,15 @@ class Grid {
     }
   }
 
-    /**
-    Toggles the field to a value or 0, depending on its previous value.
-    Also updates the sums and checks if the game is won.
+  /**
+  Toggles the field to a value or 0, depending on its previous value.
+  Also updates the sums and checks if the game is won.
 
-    @param{row} The row where the field is located.
-    @param{column} The column where the field is located.
+  @param{row} The row where the field is located.
+  @param{column} The column where the field is located.
 
-    @returns{bool} True if the game is won, else false.
-     */
+  @returns{bool} True if the game is won, else false.
+   */
   method toggleField(row: nat, column: nat) returns (gameWon: bool)
     modifies player_grid, player_rows_sum, player_columns_sum
     requires Valid()
@@ -205,11 +208,11 @@ class Grid {
     }
   }
 
-    /**
-    Checks if game is won with the current player_grid.
+  /**
+  Checks if game is won with the current player_grid.
 
-    @returns{bool} True if the game is won, else false.
-     */
+  @returns{bool} True if the game is won, else false.
+    */
   method determineGameState() returns (isGameWon: bool)
     requires Valid()
     ensures Valid()
@@ -242,11 +245,11 @@ class Grid {
     expect min <= randomNumber <= max;
   }
 
-    /**
-    Random boolean generator.
+  /**
+  Random boolean generator.
 
-    @returns{bool} Random boolean.
-    */
+  @returns{bool} Random boolean.
+  */
   method randomBool() returns (randomBool: bool)
   {
     randomBool := RandomInt(0, 1) == 1;
@@ -292,8 +295,4 @@ method {:main} Main() {
   var grid := new Grid(3);
   grid.setupGame();
   grid.printToConsole();
-
-  // TODO: wait for userInput
-  // TODO: give feedback to user
-  // TODO: let user restart game (setup new game)
 }

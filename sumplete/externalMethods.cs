@@ -8,6 +8,7 @@ public class ExternalMethods {
         return random.Next((int) min, ((int) max) + 1);
     }
 
+/*
     public static (BigInteger, BigInteger) ReadUserInput(BigInteger size) {
         while (true) {
             Console.WriteLine("Enter the field you want to change (Format: '#,#'): ");
@@ -92,4 +93,5 @@ public class ExternalMethods {
         }
         Console.WriteLine();
     }
+*/
 }
