@@ -1,5 +1,7 @@
 # Sumplete Project
 
+To run the project, just run `make` in the terminal in the current directory.
+
 ## Approach to the game
 
 To design the game for verification, I split it into many different methods.
